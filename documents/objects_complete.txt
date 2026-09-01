@@ -1,0 +1,559 @@
+OBJECT: person
+DESCRIPTION:
+A person is a human being. In images, a person can be identified by their body, face, head, arms, and legs.
+
+USES / CONTEXT:
+People commonly appear in homes, streets, offices, schools, public places, and many other environments.
+
+OBJECT: bicycle
+DESCRIPTION:
+A bicycle is a human-powered two-wheeled vehicle with pedals and handlebars.
+
+USES / CONTEXT:
+Bicycles are commonly used for transportation, exercise, commuting, and recreation.
+
+OBJECT: car
+DESCRIPTION:
+A car is a road vehicle used for transportation, normally with four wheels.
+
+USES / CONTEXT:
+Cars are commonly used on roads, highways, parking areas, and residential streets.
+
+OBJECT: motorcycle
+DESCRIPTION:
+A motorcycle is a two-wheeled motor vehicle powered by an engine.
+
+USES / CONTEXT:
+Motorcycles are commonly used for transportation, commuting, delivery, and recreation.
+
+OBJECT: airplane
+DESCRIPTION:
+An airplane is a powered aircraft designed to fly through the air.
+
+USES / CONTEXT:
+Airplanes are mainly used for passenger travel, cargo transportation, and other aviation activities.
+
+OBJECT: bus
+DESCRIPTION:
+A bus is a large road vehicle designed to transport multiple passengers.
+
+USES / CONTEXT:
+Buses are commonly used for public transportation, school transportation, city travel, and long-distance travel.
+
+OBJECT: train
+DESCRIPTION:
+A train is a series of connected railway vehicles that travel along tracks.
+
+USES / CONTEXT:
+Trains are commonly used to transport passengers and cargo over rail networks.
+
+OBJECT: truck
+DESCRIPTION:
+A truck is a motor vehicle designed to transport goods, cargo, and heavy materials.
+
+USES / CONTEXT:
+Trucks are commonly used for transporting goods, construction materials, equipment, and other heavy loads.
+
+OBJECT: boat
+DESCRIPTION:
+A boat is a watercraft designed to travel on water.
+
+USES / CONTEXT:
+Boats are commonly used for transportation, fishing, recreation, tourism, and other water activities.
+
+OBJECT: traffic light
+DESCRIPTION:
+A traffic light is a signaling device that controls road traffic using colored lights.
+
+USES / CONTEXT:
+Traffic lights are commonly installed at road intersections and crossings to manage vehicles and pedestrians.
+
+OBJECT: fire hydrant
+DESCRIPTION:
+A fire hydrant is a connection to a water supply system used by firefighters to obtain water during fires.
+
+USES / CONTEXT:
+Fire hydrants are commonly installed along streets and near buildings for emergency firefighting.
+
+OBJECT: stop sign
+DESCRIPTION:
+A stop sign is a road sign that instructs drivers to stop before proceeding.
+
+USES / CONTEXT:
+Stop signs are commonly placed at intersections, crossings, and other locations where vehicles must stop.
+
+OBJECT: parking meter
+DESCRIPTION:
+A parking meter is a device used to manage and collect payment for parking spaces.
+
+USES / CONTEXT:
+Parking meters are commonly found in streets and parking areas where paid parking is provided.
+
+OBJECT: bench
+DESCRIPTION:
+A bench is a long seat designed for one or more people.
+
+USES / CONTEXT:
+Benches are commonly found in parks, streets, waiting areas, gardens, and public spaces.
+
+OBJECT: bird
+DESCRIPTION:
+A bird is a warm-blooded animal with feathers, wings, and a beak.
+
+USES / CONTEXT:
+Birds can be found in natural environments, cities, gardens, farms, and homes.
+
+OBJECT: cat
+DESCRIPTION:
+A cat is a small domesticated mammal commonly kept as a pet.
+
+USES / CONTEXT:
+Cats are commonly kept as companion animals in homes and are also found in outdoor environments.
+
+OBJECT: dog
+DESCRIPTION:
+A dog is a domesticated mammal commonly kept as a companion or working animal.
+
+USES / CONTEXT:
+Dogs are commonly kept as pets and are also used for guarding, assistance, rescue, and other tasks.
+
+OBJECT: horse
+DESCRIPTION:
+A horse is a large domesticated mammal commonly used for riding and other activities.
+
+USES / CONTEXT:
+Horses are commonly found on farms, in riding facilities, competitions, and recreational environments.
+
+OBJECT: sheep
+DESCRIPTION:
+A sheep is a domesticated farm animal raised mainly for wool, meat, and other agricultural purposes.
+
+USES / CONTEXT:
+Sheep are commonly found on farms, ranches, and grassland environments.
+
+OBJECT: cow
+DESCRIPTION:
+A cow is a domesticated farm animal commonly raised for milk and meat.
+
+USES / CONTEXT:
+Cows are commonly found on farms, ranches, and agricultural areas.
+
+OBJECT: elephant
+DESCRIPTION:
+An elephant is a large land mammal recognized by its trunk, large ears, and tusks.
+
+USES / CONTEXT:
+Elephants are mainly found in the wild and may also be seen in wildlife parks and zoos.
+
+OBJECT: bear
+DESCRIPTION:
+A bear is a large mammal belonging to the bear family.
+
+USES / CONTEXT:
+Bears are mainly found in forests, mountains, and other natural habitats.
+
+OBJECT: zebra
+DESCRIPTION:
+A zebra is a horse-like mammal recognized by its distinctive black-and-white stripes.
+
+USES / CONTEXT:
+Zebras are mainly found in grasslands and savannas.
+
+OBJECT: giraffe
+DESCRIPTION:
+A giraffe is a tall mammal recognized by its very long neck and legs.
+
+USES / CONTEXT:
+Giraffes are mainly found in African savannas, grasslands, and wildlife areas.
+
+OBJECT: backpack
+DESCRIPTION:
+A backpack is a bag designed to be carried on a person's back using shoulder straps.
+
+USES / CONTEXT:
+Backpacks are commonly used for carrying books, laptops, clothing, equipment, and personal items.
+
+OBJECT: umbrella
+DESCRIPTION:
+An umbrella is a portable canopy used mainly to protect people from rain or sunlight.
+
+USES / CONTEXT:
+Umbrellas are commonly used outdoors during rainy or sunny weather.
+
+OBJECT: handbag
+DESCRIPTION:
+A handbag is a small bag commonly used to carry personal belongings.
+
+USES / CONTEXT:
+Handbags are commonly used to carry items such as phones, wallets, keys, cosmetics, and other personal belongings.
+
+OBJECT: tie
+DESCRIPTION:
+A tie is a strip of fabric worn around the neck, commonly as part of formal clothing.
+
+USES / CONTEXT:
+Ties are commonly worn with formal or business clothing.
+
+OBJECT: suitcase
+DESCRIPTION:
+A suitcase is a portable container used for carrying clothes and other belongings during travel.
+
+USES / CONTEXT:
+Suitcases are commonly used during air travel, road trips, and other journeys.
+
+OBJECT: frisbee
+DESCRIPTION:
+A frisbee is a flat flying disc designed to be thrown between people.
+
+USES / CONTEXT:
+Frisbees are commonly used for outdoor recreation, games, and sports.
+
+OBJECT: skis
+DESCRIPTION:
+Skis are long boards attached to a person's feet for traveling over snow.
+
+USES / CONTEXT:
+Skis are commonly used for skiing and winter sports in snowy areas.
+
+OBJECT: snowboard
+DESCRIPTION:
+A snowboard is a single board designed to slide over snow while standing on it.
+
+USES / CONTEXT:
+Snowboards are commonly used for snowboarding and winter recreation.
+
+OBJECT: sports ball
+DESCRIPTION:
+A sports ball is a ball designed for use in sports and physical games.
+
+USES / CONTEXT:
+Sports balls are used in activities such as football, basketball, baseball, and other sports.
+
+OBJECT: kite
+DESCRIPTION:
+A kite is a lightweight object designed to fly in the air using wind and a line.
+
+USES / CONTEXT:
+Kites are commonly used for recreation and outdoor activities.
+
+OBJECT: baseball bat
+DESCRIPTION:
+A baseball bat is a club-shaped piece of sports equipment used to hit a baseball.
+
+USES / CONTEXT:
+Baseball bats are mainly used in baseball and related training activities.
+
+OBJECT: baseball glove
+DESCRIPTION:
+A baseball glove is a padded glove designed to catch and field a baseball.
+
+USES / CONTEXT:
+Baseball gloves are commonly used by baseball players during fielding and catching.
+
+OBJECT: skateboard
+DESCRIPTION:
+A skateboard is a small board with wheels used for riding and performing tricks.
+
+USES / CONTEXT:
+Skateboards are commonly used for transportation, recreation, and skateboarding sports.
+
+OBJECT: surfboard
+DESCRIPTION:
+A surfboard is a board designed for riding waves on water.
+
+USES / CONTEXT:
+Surfboards are commonly used for surfing at beaches and coastal areas.
+
+OBJECT: tennis racket
+DESCRIPTION:
+A tennis racket is sports equipment with a framed head and strings used to hit a tennis ball.
+
+USES / CONTEXT:
+Tennis rackets are mainly used for tennis and related practice.
+
+OBJECT: bottle
+DESCRIPTION:
+A bottle is a container with a narrow opening used to hold liquids or other contents.
+
+USES / CONTEXT:
+Bottles are commonly used for water, beverages, cleaning products, and other liquids.
+
+OBJECT: wine glass
+DESCRIPTION:
+A wine glass is a drinking glass designed for serving wine and similar beverages.
+
+USES / CONTEXT:
+Wine glasses are commonly used at meals, restaurants, celebrations, and other dining settings.
+
+OBJECT: cup
+DESCRIPTION:
+A cup is a small container used for drinking or holding liquids.
+
+USES / CONTEXT:
+Cups are commonly used at homes, offices, restaurants, schools, and other places.
+
+OBJECT: fork
+DESCRIPTION:
+A fork is a utensil with several prongs used to pick up and eat food.
+
+USES / CONTEXT:
+Forks are commonly used for eating meals and preparing or serving food.
+
+OBJECT: knife
+DESCRIPTION:
+A knife is a sharp-edged utensil or tool used for cutting or preparing food and other materials.
+
+USES / CONTEXT:
+Kitchen knives are commonly used for food preparation, while other knives can serve different practical purposes.
+
+OBJECT: spoon
+DESCRIPTION:
+A spoon is a utensil with a rounded bowl used for eating, stirring, or serving food and liquids.
+
+USES / CONTEXT:
+Spoons are commonly used for soups, desserts, drinks, cooking, and serving food.
+
+OBJECT: bowl
+DESCRIPTION:
+A bowl is a round container used for holding food or other materials.
+
+USES / CONTEXT:
+Bowls are commonly used for meals, soups, salads, cereals, and food preparation.
+
+OBJECT: banana
+DESCRIPTION:
+A banana is an elongated edible fruit with a soft interior and peel.
+
+USES / CONTEXT:
+Bananas are commonly eaten fresh and are also used in smoothies, desserts, and cooking.
+
+OBJECT: apple
+DESCRIPTION:
+An apple is a round edible fruit that grows on apple trees.
+
+USES / CONTEXT:
+Apples are commonly eaten fresh and are also used in juices, desserts, salads, and cooking.
+
+OBJECT: sandwich
+DESCRIPTION:
+A sandwich is food made by placing filling between or inside pieces of bread.
+
+USES / CONTEXT:
+Sandwiches are commonly eaten as quick meals, lunches, snacks, and packed food.
+
+OBJECT: orange
+DESCRIPTION:
+An orange is a round citrus fruit with a peel and juicy segments.
+
+USES / CONTEXT:
+Oranges are commonly eaten fresh and used for juice, desserts, and cooking.
+
+OBJECT: broccoli
+DESCRIPTION:
+Broccoli is a green vegetable with a thick stalk and clusters of edible flower buds.
+
+USES / CONTEXT:
+Broccoli is commonly used in salads, soups, stir-fries, and cooked meals.
+
+OBJECT: carrot
+DESCRIPTION:
+A carrot is a root vegetable, commonly orange in color, that can be eaten raw or cooked.
+
+USES / CONTEXT:
+Carrots are commonly used in salads, soups, stews, snacks, and cooked dishes.
+
+OBJECT: hot dog
+DESCRIPTION:
+A hot dog is a prepared food consisting of a cooked sausage served in a sliced bun.
+
+USES / CONTEXT:
+Hot dogs are commonly served as quick meals, snacks, and at outdoor events.
+
+OBJECT: pizza
+DESCRIPTION:
+Pizza is a baked food made from dough topped with ingredients such as sauce, cheese, vegetables, or meat.
+
+USES / CONTEXT:
+Pizza is commonly served as a meal, snack, or party food.
+
+OBJECT: donut
+DESCRIPTION:
+A donut is a sweet fried or baked pastry, often ring-shaped and topped or filled.
+
+USES / CONTEXT:
+Donuts are commonly eaten as snacks, desserts, and breakfast foods.
+
+OBJECT: cake
+DESCRIPTION:
+A cake is a sweet baked food commonly made from flour, sugar, eggs, and other ingredients.
+
+USES / CONTEXT:
+Cakes are commonly served at celebrations, birthdays, weddings, and as desserts.
+
+OBJECT: chair
+DESCRIPTION:
+A chair is a piece of furniture designed for one person to sit on.
+
+USES / CONTEXT:
+Chairs are commonly found in homes, offices, classrooms, restaurants, and public places.
+
+OBJECT: couch
+DESCRIPTION:
+A couch is a large upholstered seat designed for multiple people.
+
+USES / CONTEXT:
+Couches are commonly found in living rooms, offices, waiting areas, and lounges.
+
+OBJECT: potted plant
+DESCRIPTION:
+A potted plant is a living plant grown inside a container or flowerpot.
+
+USES / CONTEXT:
+Potted plants are commonly used for decoration in homes, offices, gardens, and indoor spaces.
+
+OBJECT: bed
+DESCRIPTION:
+A bed is furniture designed for sleeping or resting.
+
+USES / CONTEXT:
+Beds are commonly found in bedrooms, hotels, hospitals, and other places used for sleeping.
+
+OBJECT: dining table
+DESCRIPTION:
+A dining table is a table designed for eating meals and serving food.
+
+USES / CONTEXT:
+Dining tables are commonly found in homes, restaurants, dining rooms, and cafeterias.
+
+OBJECT: toilet
+DESCRIPTION:
+A toilet is a plumbing fixture used for sanitation and disposal of human waste.
+
+USES / CONTEXT:
+Toilets are commonly installed in homes, offices, schools, restaurants, public buildings, and other facilities.
+
+OBJECT: tv
+DESCRIPTION:
+A television is an electronic device used to display video and play audio.
+
+USES / CONTEXT:
+Televisions are commonly used for watching movies, news, sports, shows, and other video content.
+
+OBJECT: laptop
+DESCRIPTION:
+A laptop is a portable computer with a screen, keyboard, processor, memory, and battery.
+
+USES / CONTEXT:
+Laptops are commonly used for studying, programming, office work, browsing, communication, and entertainment.
+
+OBJECT: mouse
+DESCRIPTION:
+A computer mouse is a pointing device used to control a cursor on a computer screen.
+
+USES / CONTEXT:
+Computer mice are commonly used with desktop computers and laptops for navigation and interaction.
+
+OBJECT: remote
+DESCRIPTION:
+A remote control is a handheld device used to operate electronic equipment from a distance.
+
+USES / CONTEXT:
+Remote controls are commonly used for televisions, air conditioners, media players, and other electronic devices.
+
+OBJECT: keyboard
+DESCRIPTION:
+A computer keyboard is an input device with keys used to enter text and commands.
+
+USES / CONTEXT:
+Keyboards are commonly used with computers for typing, programming, gaming, and data entry.
+
+OBJECT: cell phone
+DESCRIPTION:
+A cell phone is a portable electronic device used for communication and many digital tasks.
+
+USES / CONTEXT:
+Cell phones are commonly used for calls, messaging, internet access, photography, navigation, and applications.
+
+OBJECT: microwave
+DESCRIPTION:
+A microwave oven is an appliance that heats or cooks food using microwave energy.
+
+USES / CONTEXT:
+Microwaves are commonly used in kitchens for reheating and cooking food.
+
+OBJECT: oven
+DESCRIPTION:
+An oven is a kitchen appliance used to heat and cook food.
+
+USES / CONTEXT:
+Ovens are commonly used for baking, roasting, grilling, and other cooking tasks.
+
+OBJECT: toaster
+DESCRIPTION:
+A toaster is a kitchen appliance designed to toast slices of bread.
+
+USES / CONTEXT:
+Toasters are commonly used in kitchens to prepare toast and similar foods.
+
+OBJECT: sink
+DESCRIPTION:
+A sink is a basin with plumbing used for washing, cleaning, and related tasks.
+
+USES / CONTEXT:
+Sinks are commonly found in kitchens, bathrooms, laboratories, and utility areas.
+
+OBJECT: refrigerator
+DESCRIPTION:
+A refrigerator is an appliance that keeps food and drinks cool to slow spoilage.
+
+USES / CONTEXT:
+Refrigerators are commonly used in homes, restaurants, stores, and other food-related environments.
+
+OBJECT: book
+DESCRIPTION:
+A book is a collection of written, printed, or illustrated pages bound together.
+
+USES / CONTEXT:
+Books are commonly used for education, information, reference, entertainment, and reading.
+
+OBJECT: clock
+DESCRIPTION:
+A clock is a device used to measure and display time.
+
+USES / CONTEXT:
+Clocks are commonly found in homes, offices, schools, public buildings, and electronic devices.
+
+OBJECT: vase
+DESCRIPTION:
+A vase is a container commonly used to hold flowers or for decoration.
+
+USES / CONTEXT:
+Vases are commonly used in homes, offices, restaurants, events, and decorative displays.
+
+OBJECT: scissors
+DESCRIPTION:
+Scissors are a cutting tool made of two blades joined at a pivot.
+
+USES / CONTEXT:
+Scissors are commonly used for cutting paper, fabric, packaging, and other materials.
+
+OBJECT: teddy bear
+DESCRIPTION:
+A teddy bear is a soft stuffed toy shaped like a bear.
+
+USES / CONTEXT:
+Teddy bears are commonly used as children's toys, gifts, and decorative items.
+
+OBJECT: hair drier
+DESCRIPTION:
+A hair dryer is an electrical appliance that blows warm or cool air to dry hair.
+
+USES / CONTEXT:
+Hair dryers are commonly used in homes, salons, hotels, and other personal-care settings.
+
+OBJECT: toothbrush
+DESCRIPTION:
+A toothbrush is a small personal-care tool with bristles used to clean teeth.
+
+USES / CONTEXT:
+Toothbrushes are commonly used for daily oral hygiene and dental care.

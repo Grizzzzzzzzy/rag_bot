@@ -1,0 +1,21 @@
+# Virtual environment
+venv/
+
+# Environment variables / secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Temporary files
+tempCodeRunnerFile.py
+
+# Uploaded/generated images
+static/uploads/*
+
+# Test image
+test.jpg

@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>JARVIS | Vision + RAG Intelligence</title>
+
+    <style>
+
+        :root {
+            --bg: #02080d;
+            --panel: #07151e;
+            --panel-dark: #030c12;
+            --cyan: #00e5ff;
+            --cyan-light: #71f5ff;
+            --blue: #149cff;
+            --green: #00ffc8;
+            --white: #e9fcff;
+            --muted: #66838e;
+            --muted2: #466572;
+            --border: rgba(0, 229, 255, 0.20);
+            --border-hover: rgba(0, 229, 255, 0.55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+
+            background:
+                radial-gradient(
+                    circle at 50% 10%,
+                    rgba(0, 229, 255, 0.08),
+                    transparent 35%
+                ),
+                var(--bg);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+
+            background-image:
+                linear-gradient(
+                    rgba(0, 229, 255, 0.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(0, 229, 255, 0.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 55px 55px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            width: 100%;
+            height: 70px;
+            padding: 0 4%;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            border-bottom: 1px solid var(--border);
+
+            background: rgba(2, 8, 13, 0.94);
+
+            backdrop-filter: blur(15px);
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid var(--cyan);
+
+            transform: rotate(45deg);
+
+            box-shadow:
+                0 0 18px rgba(0, 229, 255, 0.15);
+        }
+
+        .brand-mark span {
+            transform: rotate(-45deg);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            letter-spacing: 5px;
+        }
+
+        .brand-sub {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 7px;
+            letter-spacing: 2px;
+        }
+
+        .online {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            color: var(--green);
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+
+        .online-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--green);
+
+            box-shadow: 0 0 10px var(--green);
+
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* ================= MAIN ================= */
+
+        .container {
+            width: min(1250px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 50px 0 40px;
+        }
+
+        /* ================= HERO ================= */
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero-tag {
+            color: var(--cyan);
+            font-size: 8px;
+            letter-spacing: 4px;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            font-size: clamp(45px, 7vw, 75px);
+            font-weight: 300;
+            letter-spacing: 12px;
+
+            color: white;
+
+            text-shadow:
+                0 0 25px rgba(0, 229, 255, 0.25);
+        }
+
+        .hero p {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 3px;
+        }
+
+        /* ================= STATS ================= */
+
+        .stats {
+            width: 100%;
+
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            padding: 18px;
+
+            border: 1px solid var(--border);
+
+            background: rgba(7, 21, 30, 0.85);
+
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 7px;
+            letter-spacing: 2px;
+        }
+
+        .stat-value {
+            margin-top: 8px;
+
+            color: var(--cyan-light);
+
+            font-size: 16px;
+            font-weight: 500;
+
+            letter-spacing: 2px;
+        }
+
+        /* ================= PANELS ================= */
+
+        .panel {
+            min-width: 0;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(9, 27, 38, 0.96),
+                    rgba(3, 12, 18, 0.96)
+                );
+
+            border: 1px solid var(--border);
+
+            border-radius: 6px;
+
+            overflow: hidden;
+        }
+
+        .panel-header {
+            min-height: 50px;
+
+            padding: 14px 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+
+            border-bottom: 1px solid var(--border);
+
+            color: var(--cyan-light);
+
+            font-size: 8px;
+            letter-spacing: 3px;
+        }
+
+        .panel-code {
+            color: var(--muted2);
+            font-size: 7px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        /* ================= WORKSPACE ================= */
+
+        .workspace {
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(280px, 330px);
+
+            gap: 16px;
+        }
+
+        /* ================= SCANNER ================= */
+
+        .scanner {
+            min-height: 420px;
+
+            padding: 35px 20px;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+        }
+
+        .scanner-core {
+            width: 170px;
+            height: 170px;
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 28px;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+        }
+
+        .r1 {
+            inset: 0;
+            border-top-color: var(--cyan);
+            animation: rotate 6s linear infinite;
+        }
+
+        .r2 {
+            inset: 18px;
+            border-right-color: var(--blue);
+            animation: reverseRotate 4s linear infinite;
+        }
+
+        .r3 {
+            inset: 38px;
+            border-bottom-color: var(--cyan);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes reverseRotate {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        .scanner-center {
+            width: 55px;
+            height: 55px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    white,
+                    var(--cyan) 15%,
+                    #007fa5 35%,
+                    transparent 70%
+                );
+
+            box-shadow:
+                0 0 25px var(--cyan),
+                0 0 60px rgba(0, 229, 255, 0.35);
+
+            animation: corePulse 2s infinite;
+        }
+
+        @keyframes corePulse {
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .scanner-title {
+            font-size: 15px;
+            letter-spacing: 3px;
+        }
+
+        .scanner-description {
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        /* ================= UPLOAD ================= */
+
+        .upload-form {
+            width: 100%;
+            max-width: 240px;
+
+            margin-top: 23px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #image {
+            display: none;
+        }
+
+        .upload-button,
+        .analyze-button {
+            width: 220px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 0;
+
+            font-size: 8px;
+            letter-spacing: 3px;
+
+            cursor: pointer;
+
+            transition: 0.25s ease;
+        }
+
+        .upload-button {
+            border: 1px solid var(--cyan);
+            color: var(--cyan-light);
+
+            background: rgba(0, 229, 255, 0.03);
+        }
+
+        .upload-button:hover {
+            background: rgba(0, 229, 255, 0.10);
+
+            box-shadow:
+                0 0 20px rgba(0, 229, 255, 0.15);
+        }
+
+        .selected-file {
+            width: 220px;
+
+            margin-top: 8px;
+
+            color: #4f727e;
+
+            font-size: 8px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .analyze-button {
+            margin-top: 14px;
+
+            border: 1px solid var(--green);
+
+            color: #a5fff0;
+
+            background: rgba(0, 255, 200, 0.025);
+        }
+
+        .analyze-button:hover {
+            background: rgba(0, 255, 200, 0.10);
+
+            box-shadow:
+                0 0 20px rgba(0, 255, 200, 0.15);
+        }
+
+        .analyze-button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        /* ================= SYSTEM ================= */
+
+        .system-body {
+            padding: 20px;
+        }
+
+        .system-heading {
+            color: var(--muted);
+
+            font-size: 7px;
+            letter-spacing: 2px;
+
+            margin-bottom: 8px;
+        }
+
+        .system-item {
+            padding: 14px 0;
+
+            border-bottom:
+                1px solid rgba(0, 229, 255, 0.07);
+        }
+
+        .system-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-bottom: 8px;
+        }
+
+        .system-name {
+            color: #9ab2bb;
+            font-size: 8px;
+        }
+
+        .system-state {
+            color: var(--green);
+            font-size: 7px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 3px;
+
+            background: rgba(255, 255, 255, 0.05);
+
+            overflow: hidden;
+        }
+
+        .progress span {
+            display: block;
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--blue),
+                    var(--cyan)
+                );
+        }
+
+        .console {
+            margin-top: 20px;
+            padding: 13px;
+
+            background: #02080c;
+
+            border:
+                1px solid rgba(0, 229, 255, 0.08);
+
+            color: #486875;
+
+            font-family: Consolas, monospace;
+
+            font-size: 7px;
+            line-height: 2;
+        }
+
+        .console .active {
+            color: var(--cyan);
+        }
+
+        .console .green {
+            color: var(--green);
+        }
+
+        /* ================= RAG ================= */
+
+        .rag-panel {
+            margin-top: 16px;
+        }
+
+        .rag-body {
+            padding: 20px;
+        }
+
+        .rag-intro {
+            color: var(--muted);
+
+            font-size: 9px;
+            line-height: 1.7;
+
+            margin-bottom: 15px;
+        }
+
+        .rag-form {
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                150px;
+
+            gap: 10px;
+        }
+
+        .rag-input {
+            width: 100%;
+            height: 45px;
+
+            padding: 0 14px;
+
+            border: 1px solid var(--border);
+
+            outline: none;
+
+            background: rgba(0, 0, 0, 0.25);
+
+            color: white;
+
+            font-size: 9px;
+        }
+
+        .rag-input:focus {
+            border-color: var(--cyan);
+
+            box-shadow:
+                0 0 15px rgba(0, 229, 255, 0.06);
+        }
+
+        .rag-input::placeholder {
+            color: #4c6872;
+        }
+
+        .rag-button {
+            width: 100%;
+            height: 45px;
+
+            border: 1px solid var(--cyan);
+
+            background: rgba(0, 229, 255, 0.04);
+
+            color: var(--cyan-light);
+
+            cursor: pointer;
+
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+
+        .rag-button:hover {
+            background: rgba(0, 229, 255, 0.10);
+        }
+
+        .rag-button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .rag-loading {
+            display: none;
+
+            margin-top: 15px;
+
+            color: var(--cyan);
+
+            font-family: Consolas, monospace;
+
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+
+        .rag-error {
+            display: none;
+
+            margin-top: 15px;
+            padding: 14px;
+
+            border:
+                1px solid rgba(255, 80, 80, 0.25);
+
+            background:
+                rgba(255, 50, 50, 0.04);
+
+            color: #ff9999;
+
+            font-size: 9px;
+        }
+
+        .rag-result {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .rag-answer {
+            padding: 17px;
+
+            border:
+                1px solid rgba(0, 255, 200, 0.18);
+
+            background:
+                rgba(0, 255, 200, 0.025);
+
+            color: #bce8e4;
+
+            font-size: 9px;
+            line-height: 1.8;
+
+            white-space: pre-wrap;
+        }
+
+        .rag-answer-title {
+            color: var(--green);
+
+            font-size: 8px;
+            letter-spacing: 2px;
+
+            margin-bottom: 10px;
+        }
+
+        .rag-sources {
+            margin-top: 10px;
+
+            color: var(--muted2);
+
+            font-size: 7px;
+            line-height: 1.7;
+        }
+
+        .source-item {
+            display: inline-block;
+
+            margin: 5px 5px 0 0;
+            padding: 5px 8px;
+
+            border:
+                1px solid rgba(0, 229, 255, 0.12);
+        }
+
+        /* ================= RESULTS ================= */
+
+        .results {
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(300px, 400px);
+
+            gap: 16px;
+
+            margin-top: 16px;
+        }
+
+        .result-image {
+            min-height: 400px;
+
+            padding: 20px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(0, 229, 255, 0.05),
+                    transparent 70%
+                );
+        }
+
+        .result-image img {
+            max-width: 100%;
+            max-height: 600px;
+
+            display: block;
+
+            border:
+                1px solid var(--border-hover);
+
+            box-shadow:
+                0 0 30px rgba(0, 229, 255, 0.10);
+        }
+
+        /* ================= DETECTION ================= */
+
+        .detection-body {
+            padding: 20px;
+
+            max-height: 620px;
+
+            overflow-y: auto;
+        }
+
+        .detection-summary {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            padding: 16px;
+
+            background:
+                rgba(0, 229, 255, 0.03);
+
+            border:
+                1px solid rgba(0, 229, 255, 0.12);
+        }
+
+        .summary-label {
+            color: var(--muted);
+
+            font-size: 7px;
+            letter-spacing: 2px;
+        }
+
+        .summary-number {
+            margin-top: 7px;
+
+            color: var(--cyan);
+
+            font-size: 27px;
+        }
+
+        .section-title {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin: 5px 0 12px;
+        }
+
+        .section-title span:first-child {
+            color: var(--cyan-light);
+
+            font-size: 8px;
+            letter-spacing: 3px;
+        }
+
+        .section-title span:last-child {
+            color: #466572;
+
+            font-size: 7px;
+        }
+
+        .group-list,
+        .individual-list,
+        .knowledge-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            margin-bottom: 22px;
+        }
+
+        .group-item,
+        .object,
+        .knowledge-item {
+            padding: 13px;
+
+            border:
+                1px solid rgba(0, 229, 255, 0.10);
+
+            background:
+                rgba(255, 255, 255, 0.01);
+        }
+
+        .group-item:hover,
+        .object:hover,
+        .knowledge-item:hover {
+            border-color:
+                rgba(0, 229, 255, 0.35);
+        }
+
+        .group-top,
+        .object-top {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-bottom: 8px;
+        }
+
+        .group-name,
+        .object-name {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            color: #dffbff;
+
+            font-size: 8px;
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+        }
+
+        .group-dot,
+        .object-dot {
+            width: 6px;
+            height: 6px;
+
+            flex: 0 0 6px;
+
+            border:
+                1px solid var(--cyan);
+
+            box-shadow:
+                0 0 7px var(--cyan);
+        }
+
+        .group-count,
+        .confidence {
+            color: var(--green);
+
+            font-family: Consolas, monospace;
+
+            font-size: 9px;
+        }
+
+        .group-bar,
+        .confidence-bar {
+            height: 3px;
+
+            background:
+                rgba(255, 255, 255, 0.05);
+
+            overflow: hidden;
+        }
+
+        .group-fill,
+        .confidence-fill {
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--blue),
+                    var(--cyan),
+                    var(--green)
+                );
+        }
+
+        .group-meta {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-top: 7px;
+
+            color: #506e78;
+
+            font-size: 7px;
+        }
+
+        /* ================= KNOWLEDGE ================= */
+
+        .knowledge-name {
+            color: var(--cyan-light);
+
+            font-size: 9px;
+            letter-spacing: 2px;
+
+            margin-bottom: 9px;
+
+            text-transform: uppercase;
+        }
+
+        .knowledge-text {
+            color: #8faeb7;
+
+            font-size: 8px;
+            line-height: 1.8;
+
+            white-space: pre-wrap;
+        }
+
+        .knowledge-empty {
+            padding: 15px;
+
+            border:
+                1px solid rgba(0, 229, 255, 0.08);
+
+            color: var(--muted);
+
+            font-size: 8px;
+
+            text-align: center;
+        }
+
+        .no-results {
+            padding: 50px 10px;
+
+            text-align: center;
+
+            color: #4d6973;
+
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            padding-top: 35px;
+
+            text-align: center;
+
+            color: #36545e;
+
+            font-size: 7px;
+            letter-spacing: 3px;
+        }
+
+        /* ================= SCROLLBAR ================= */
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #02080d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background:
+                rgba(0, 229, 255, 0.25);
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 950px) {
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .container {
+                width: calc(100% - 24px);
+                padding-top: 35px;
+            }
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .brand-sub {
+                display: none;
+            }
+
+            .online {
+                font-size: 6px;
+            }
+
+            .hero h1 {
+                letter-spacing: 6px;
+            }
+
+            .hero p {
+                letter-spacing: 1px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .scanner {
+                min-height: 400px;
+            }
+
+            .rag-form {
+                grid-template-columns: 1fr;
+            }
+
+            .detection-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <div class="brand">
+
+        <div class="brand-mark">
+            <span>J</span>
+        </div>
+
+        <div>
+            <div class="brand-name">
+                JARVIS
+            </div>
+
+            <div class="brand-sub">
+                ADVANCED VISION INTELLIGENCE
+            </div>
+        </div>
+
+    </div>
+
+    <div class="online">
+        <span class="online-dot"></span>
+        VISION CORE ONLINE
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="hero-tag">
+            ARTIFICIAL INTELLIGENCE
+        </div>
+
+        <h1>JARVIS</h1>
+
+        <p>
+            INTELLIGENT VISUAL ANALYSIS SYSTEM
+        </p>
+
+    </section>
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+        <div class="stat">
+
+            <div class="stat-label">
+                VISION ENGINE
+            </div>
+
+            <div class="stat-value">
+                YOLO
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                AI MODE
+            </div>
+
+            <div class="stat-value">
+                VISION + RAG
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                CORE STATUS
+            </div>
+
+            <div class="stat-value">
+                READY
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- WORKSPACE -->
+
+    <section class="workspace">
+
+        <!-- IMAGE SCANNER -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <span>
+                    VISUAL SCANNER
+                </span>
+
+                <span class="panel-code">
+                    JARVIS / INPUT
+                </span>
+
+            </div>
+
+
+            <div class="scanner">
+
+                <div class="scanner-core">
+
+                    <div class="ring r1"></div>
+                    <div class="ring r2"></div>
+                    <div class="ring r3"></div>
+
+                    <div class="scanner-center"></div>
+
+                </div>
+
+
+                <div class="scanner-title">
+                    READY FOR VISUAL SCAN
+                </div>
+
+                <div class="scanner-description">
+                    Upload an image and let JARVIS detect objects
+                </div>
+
+
+                <form
+                    class="upload-form"
+                    method="POST"
+                    action="/"
+                    enctype="multipart/form-data"
+                    onsubmit="startScan()"
+                >
+
+                    <input
+                        type="file"
+                        name="image"
+                        id="image"
+                        accept="image/*"
+                        required
+                        onchange="showFile()"
+                    >
+
+
+                    <label
+                        for="image"
+                        class="upload-button"
+                    >
+                        SELECT IMAGE
+                    </label>
+
+
+                    <div
+                        class="selected-file"
+                        id="selectedFile"
+                    >
+                        NO IMAGE SELECTED
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="analyze-button"
+                        id="analyzeButton"
+                    >
+                        ANALYZE IMAGE
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- SYSTEM STATUS -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <span>
+                    JARVIS STATUS
+                </span>
+
+                <span class="panel-code">
+                    SYSTEM
+                </span>
+
+            </div>
+
+
+            <div class="system-body">
+
+                <div class="system-heading">
+                    CORE SYSTEMS
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-row">
+
+                        <span class="system-name">
+                            YOLO ENGINE
+                        </span>
+
+                        <span class="system-state">
+                            ONLINE
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+                        <span style="width:100%"></span>
+                    </div>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-row">
+
+                        <span class="system-name">
+                            IMAGE PROCESSOR
+                        </span>
+
+                        <span class="system-state">
+                            READY
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+                        <span style="width:96%"></span>
+                    </div>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-row">
+
+                        <span class="system-name">
+                            VISION CORE
+                        </span>
+
+                        <span class="system-state">
+                            ACTIVE
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+                        <span style="width:92%"></span>
+                    </div>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-row">
+
+                        <span class="system-name">
+                            RAG MODULE
+                        </span>
+
+                        <span class="system-state">
+                            READY
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+                        <span style="width:90%"></span>
+                    </div>
+
+                </div>
+
+
+                <div class="console">
+
+                    <div class="active">
+                        &gt; JARVIS CORE INITIALIZED
+                    </div>
+
+                    <div>
+                        &gt; YOLO model loaded
+                    </div>
+
+                    <div>
+                        &gt; Vision system ready
+                    </div>
+
+                    <div>
+                        &gt; RAG interface ready
+                    </div>
+
+                    <div class="green">
+                        &gt; Awaiting image input_
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RAG QUESTION -->
+
+    <section class="panel rag-panel">
+
+        <div class="panel-header">
+
+            <span>
+                JARVIS RAG INTELLIGENCE
+            </span>
+
+            <span class="panel-code">
+                KNOWLEDGE QUERY
+            </span>
+
+        </div>
+
+
+        <div class="rag-body">
+
+            <div class="rag-intro">
+                Ask JARVIS about the objects detected in the uploaded image.
+            </div>
+
+
+            <form
+                class="rag-form"
+                id="ragForm"
+            >
+
+                <input
+                    type="text"
+                    name="question"
+                    id="ragQuestion"
+                    class="rag-input"
+                    placeholder="Ask JARVIS something..."
+                    autocomplete="off"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="rag-button"
+                    id="ragButton"
+                >
+                    ASK JARVIS
+                </button>
+
+            </form>
+
+
+            <div
+                class="rag-loading"
+                id="ragLoading"
+            >
+                &gt; JARVIS IS SEARCHING KNOWLEDGE BASE...
+            </div>
+
+
+            <div
+                class="rag-error"
+                id="ragError"
+            ></div>
+
+
+            <div
+                class="rag-result"
+                id="ragResult"
+            >
+
+                <div class="rag-answer">
+
+                    <div class="rag-answer-title">
+                        JARVIS RESPONSE
+                    </div>
+
+                    <div id="ragAnswerText"></div>
+
+                    <div
+                        class="rag-sources"
+                        id="ragSources"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- DETECTION RESULTS -->
+
+    {% if image_path or detections %}
+
+    <section class="results">
+
+        <!-- IMAGE -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <span>
+                    JARVIS VISION OUTPUT
+                </span>
+
+                <span class="panel-code">
+                    DETECTION RESULT
+                </span>
+
+            </div>
+
+
+            <div class="result-image">
+
+                {% if image_path %}
+
+                    <img
+                        src="{{ image_path }}"
+                        alt="JARVIS Detection Result"
+                    >
+
+                {% else %}
+
+                    <span style="color:#506b75;">
+                        NO IMAGE AVAILABLE
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ANALYSIS -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <span>
+                    JARVIS ANALYSIS
+                </span>
+
+                <span class="panel-code">
+                    OBJECT INTELLIGENCE
+                </span>
+
+            </div>
+
+
+            <div class="detection-body">
+
+                {% if detections %}
+
+                    <!-- SUMMARY -->
+
+                    <div class="detection-summary">
+
+                        <div class="summary-box">
+
+                            <div class="summary-label">
+                                TOTAL OBJECTS
+                            </div>
+
+                            <div class="summary-number">
+                                {{ total_objects }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-box">
+
+                            <div class="summary-label">
+                                OBJECT TYPES
+                            </div>
+
+                            <div class="summary-number">
+                                {{ grouped_detections|length }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- OBJECT COUNT -->
+
+                    <div class="section-title">
+
+                        <span>
+                            OBJECT COUNT
+                        </span>
+
+                        <span>
+                            GROUPED
+                        </span>
+
+                    </div>
+
+
+                    <div class="group-list">
+
+                        {% for item in grouped_detections %}
+
+                        <div class="group-item">
+
+                            <div class="group-top">
+
+                                <div class="group-name">
+
+                                    <span class="group-dot"></span>
+
+                                    {{ item.name }}
+
+                                </div>
+
+                                <div class="group-count">
+                                    × {{ item.count }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="group-bar">
+
+                                <div
+                                    class="group-fill"
+                                    style="width:{{ item.confidence }}%;"
+                                ></div>
+
+                            </div>
+
+
+                            <div class="group-meta">
+
+                                <span>
+                                    {{ item.count }} DETECTED
+                                </span>
+
+                                <span>
+                                    AVG {{ item.confidence }}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- DETECTION LOG -->
+
+                    <div class="section-title">
+
+                        <span>
+                            DETECTION LOG
+                        </span>
+
+                        <span>
+                            INDIVIDUAL
+                        </span>
+
+                    </div>
+
+
+                    <div class="individual-list">
+
+                        {% for item in detections %}
+
+                        <div class="object">
+
+                            <div class="object-top">
+
+                                <div class="object-name">
+
+                                    <span class="object-dot"></span>
+
+                                    {{ item.name }}
+
+                                </div>
+
+                                <div class="confidence">
+                                    {{ item.confidence }}%
+                                </div>
+
+                            </div>
+
+
+                            <div class="confidence-bar">
+
+                                <div
+                                    class="confidence-fill"
+                                    style="width:{{ item.confidence }}%;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         FIXED OBJECT KNOWLEDGE
+                         ONLY SHOW KNOWLEDGE FOR DETECTED OBJECTS
+                    =================================================== -->
+
+                    {% if object_information %}
+
+                    <div class="section-title">
+
+                        <span>
+                            OBJECT KNOWLEDGE
+                        </span>
+
+                        <span>
+                            RAG
+                        </span>
+
+                    </div>
+
+
+                    <div class="knowledge-list">
+
+                        {% for detected in grouped_detections %}
+
+                            {% set found = namespace(value=false) %}
+
+                            {% for info in object_information %}
+
+                                {% if info.name|lower|trim == detected.name|lower|trim %}
+
+                                    {% set found.value = true %}
+
+                                    <div class="knowledge-item">
+
+                                        <div class="knowledge-name">
+                                            {{ info.name }}
+                                        </div>
+
+                                        <div class="knowledge-text">
+                                            {{ info.information }}
+                                        </div>
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {% if not found.value %}
+
+                                <div class="knowledge-item">
+
+                                    <div class="knowledge-name">
+                                        {{ detected.name }}
+                                    </div>
+
+                                    <div class="knowledge-text">
+                                        No knowledge available for this detected object.
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% endif %}
+
+
+                {% else %}
+
+                    <div class="no-results">
+                        NO OBJECTS DETECTED
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <footer>
+        JARVIS
+        &nbsp; // &nbsp;
+        VISION + RAG INTELLIGENCE
+        &nbsp; // &nbsp;
+        SYSTEM OPERATIONAL
+    </footer>
+
+</main>
+
+
+<script>
+
+    /* ===============================
+       FILE SELECTION
+    =============================== */
+
+    function showFile() {
+
+        const input =
+            document.getElementById("image");
+
+        const display =
+            document.getElementById("selectedFile");
+
+        if (
+            input &&
+            input.files &&
+            input.files.length > 0
+        ) {
+
+            display.textContent =
+                "SELECTED // " +
+                input.files[0].name;
+
+        } else {
+
+            display.textContent =
+                "NO IMAGE SELECTED";
+
+        }
+
+    }
+
+
+    /* ===============================
+       IMAGE ANALYSIS
+    =============================== */
+
+    function startScan() {
+
+        const button =
+            document.getElementById("analyzeButton");
+
+        if (!button) {
+            return true;
+        }
+
+        button.disabled = true;
+
+        button.textContent =
+            "JARVIS IS ANALYZING...";
+
+        return true;
+
+    }
+
+
+    /* ===============================
+       RAG
+    =============================== */
+
+    const ragForm =
+        document.getElementById("ragForm");
+
+
+    if (ragForm) {
+
+        ragForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                const questionInput =
+                    document.getElementById("ragQuestion");
+
+                const button =
+                    document.getElementById("ragButton");
+
+                const loading =
+                    document.getElementById("ragLoading");
+
+                const errorBox =
+                    document.getElementById("ragError");
+
+                const resultBox =
+                    document.getElementById("ragResult");
+
+                const answerText =
+                    document.getElementById("ragAnswerText");
+
+                const sourcesBox =
+                    document.getElementById("ragSources");
+
+
+                const question =
+                    questionInput.value.trim();
+
+
+                if (!question) {
+                    return;
+                }
+
+
+                /* RESET */
+
+                errorBox.style.display = "none";
+                errorBox.textContent = "";
+
+                resultBox.style.display = "none";
+
+                answerText.textContent = "";
+
+                sourcesBox.innerHTML = "";
+
+
+                /* LOADING */
+
+                loading.style.display = "block";
+
+                button.disabled = true;
+
+                button.textContent =
+                    "SEARCHING...";
+
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        "question",
+                        question
+                    );
+
+
+                    const response =
+                        await fetch(
+                            "/rag",
+                            {
+                                method: "POST",
+                                body: formData
+                            }
+                        );
+
+
+                    /* SERVER ERROR CHECK */
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned " +
+                            response.status
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    loading.style.display =
+                        "none";
+
+
+                    /* SUCCESS */
+
+                    if (data.success === true) {
+
+                        answerText.textContent =
+                            data.answer ||
+                            "No answer returned.";
+
+
+                        if (
+                            Array.isArray(data.sources) &&
+                            data.sources.length > 0
+                        ) {
+
+                            const title =
+                                document.createElement("div");
+
+                            title.textContent =
+                                "SOURCES";
+
+                            sourcesBox.appendChild(title);
+
+
+                            data.sources.forEach(
+                                function(source) {
+
+                                    const sourceItem =
+                                        document.createElement("span");
+
+                                    sourceItem.className =
+                                        "source-item";
+
+                                    sourceItem.textContent =
+                                        source;
+
+                                    sourcesBox.appendChild(
+                                        sourceItem
+                                    );
+
+                                }
+                            );
+
+                        }
+
+
+                        resultBox.style.display =
+                            "block";
+
+                    } else {
+
+                        errorBox.textContent =
+                            data.answer ||
+                            "Unable to retrieve information.";
+
+                        errorBox.style.display =
+                            "block";
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    loading.style.display =
+                        "none";
+
+                    errorBox.textContent =
+                        "JARVIS connection error. Please make sure the Flask server is running.";
+
+                    errorBox.style.display =
+                        "block";
+
+                    console.error(
+                        "RAG ERROR:",
+                        error
+                    );
+
+                }
+
+                finally {
+
+                    button.disabled = false;
+
+                    button.textContent =
+                        "ASK JARVIS";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ===============================
+       ENTER KEY
+    =============================== */
+
+    const questionInput =
+        document.getElementById("ragQuestion");
+
+
+    if (questionInput) {
+
+        questionInput.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    ragForm.requestSubmit();
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
+
+</body>
+
+</html>
