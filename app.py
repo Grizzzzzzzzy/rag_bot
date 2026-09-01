@@ -1,13 +1,22 @@
-from flask import Flask, render_template, request, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify
+)
+
 from ultralytics import YOLO
+
 from PIL import Image
+
 import os
 import uuid
-import re
+
 from collections import Counter
 
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
+from rag import (
+    answer_question
+)
 
 
 # =========================================================
@@ -21,7 +30,9 @@ app = Flask(__name__)
 # BASE DIRECTORY
 # =========================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 
 # =========================================================
@@ -34,24 +45,16 @@ UPLOAD_FOLDER = os.path.join(
     "uploads"
 )
 
-VECTORSTORE_PATH = os.path.join(
-    BASE_DIR,
-    "vectorstore"
-)
-
-OBJECTS_FILE = os.path.join(
-    BASE_DIR,
-    "documents",
-    "objects_complete.txt"
-)
-
 
 os.makedirs(
     UPLOAD_FOLDER,
     exist_ok=True
 )
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+app.config[
+    "UPLOAD_FOLDER"
+] = UPLOAD_FOLDER
 
 
 # =========================================================
@@ -63,14 +66,22 @@ print("=" * 60)
 print("LOADING YOLO MODEL")
 print("=" * 60)
 
-model = YOLO(
-    os.path.join(
-        BASE_DIR,
-        "yolo26n.pt"
-    )
+
+MODEL_PATH = os.path.join(
+    BASE_DIR,
+    "yolo26n.pt"
 )
 
-print("YOLO model loaded successfully!")
+
+model = YOLO(
+    MODEL_PATH
+)
+
+
+print(
+    "YOLO model loaded successfully!"
+)
+
 
 print()
 print("YOLO classes:")
@@ -78,383 +89,7 @@ print(model.names)
 
 
 # =========================================================
-# LOAD RAG VECTOR DATABASE
-# =========================================================
-
-print()
-print("=" * 60)
-print("LOADING RAG VECTOR DATABASE")
-print("=" * 60)
-
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
-
-vectorstore = FAISS.load_local(
-    VECTORSTORE_PATH,
-    embeddings,
-    allow_dangerous_deserialization=True
-)
-
-
-print("RAG vector database loaded successfully!")
-
-
-# =========================================================
-# LOAD OBJECT KNOWLEDGE
-# =========================================================
-
-def load_object_knowledge():
-
-    knowledge = {}
-
-    print()
-    print("=" * 60)
-    print("LOADING OBJECT KNOWLEDGE")
-    print("=" * 60)
-
-    print(
-        "Looking for:",
-        OBJECTS_FILE
-    )
-
-    # -----------------------------------------------------
-    # CHECK FILE
-    # -----------------------------------------------------
-
-    if not os.path.exists(OBJECTS_FILE):
-
-        print(
-            "ERROR: Object knowledge file not found!"
-        )
-
-        return knowledge
-
-
-    print(
-        "Object knowledge file found!"
-    )
-
-
-    # -----------------------------------------------------
-    # READ FILE
-    # -----------------------------------------------------
-
-    try:
-
-        with open(
-            OBJECTS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            content = file.read()
-
-    except Exception as e:
-
-        print(
-            "ERROR READING OBJECT FILE:",
-            e
-        )
-
-        return knowledge
-
-
-    # -----------------------------------------------------
-    # SPLIT OBJECTS
-    # -----------------------------------------------------
-
-    blocks = [
-        block.strip()
-        for block in re.split(
-            r"\n\s*\n",
-            content
-        )
-        if block.strip()
-    ]
-
-
-    print(
-        "Number of blocks found:",
-        len(blocks)
-    )
-
-
-    # -----------------------------------------------------
-    # PROCESS OBJECT BLOCKS
-    # -----------------------------------------------------
-
-    for block in blocks:
-
-        lines = block.splitlines()
-
-        object_name = None
-
-
-        for line in lines:
-
-            line = line.strip()
-
-            if line.upper().startswith("OBJECT:"):
-
-                object_name = (
-                    line
-                    .split(
-                        ":",
-                        1
-                    )[1]
-                    .strip()
-                    .lower()
-                )
-
-                break
-
-
-        # -------------------------------------------------
-        # SAVE OBJECT
-        # -------------------------------------------------
-
-        if object_name:
-
-            knowledge[object_name] = block
-
-
-    # -----------------------------------------------------
-    # PRINT LOADED OBJECTS
-    # -----------------------------------------------------
-
-    print(
-        "Loaded exact knowledge for",
-        len(knowledge),
-        "objects."
-    )
-
-
-    print()
-    print("Available object knowledge:")
-
-    for object_name in knowledge:
-
-        print(
-            " -",
-            object_name
-        )
-
-
-    print(
-        "=" * 60
-    )
-
-    return knowledge
-
-
-# =========================================================
-# LOAD KNOWLEDGE ONCE
-# =========================================================
-
-OBJECT_KNOWLEDGE = load_object_knowledge()
-
-
-# =========================================================
-# FIND OBJECT IN QUESTION
-# =========================================================
-
-def find_objects_in_question(question):
-
-    """
-    Finds exact object names from the question.
-
-    Example:
-
-    "what is bus?"
-        -> ["bus"]
-
-    "tell me about the truck"
-        -> ["truck"]
-
-    "what is a traffic light?"
-        -> ["traffic light"]
-
-    The longest object names are checked first so that
-    multi-word objects work correctly.
-    """
-
-    question = (
-        question
-        .strip()
-        .lower()
-    )
-
-
-    # -----------------------------------------------------
-    # Normalize punctuation
-    # -----------------------------------------------------
-
-    normalized_question = re.sub(
-        r"[^\w\s]",
-        " ",
-        question
-    )
-
-    normalized_question = re.sub(
-        r"\s+",
-        " ",
-        normalized_question
-    ).strip()
-
-
-    found_objects = []
-
-
-    # -----------------------------------------------------
-    # Sort longest names first
-    # -----------------------------------------------------
-
-    object_names = sorted(
-        OBJECT_KNOWLEDGE.keys(),
-        key=len,
-        reverse=True
-    )
-
-
-    # -----------------------------------------------------
-    # Search exact object names
-    # -----------------------------------------------------
-
-    for object_name in object_names:
-
-        pattern = (
-            r"\b"
-            + re.escape(object_name)
-            + r"\b"
-        )
-
-
-        if re.search(
-            pattern,
-            normalized_question
-        ):
-
-            found_objects.append(
-                object_name
-            )
-
-
-    # -----------------------------------------------------
-    # Remove duplicates
-    # -----------------------------------------------------
-
-    found_objects = list(
-        dict.fromkeys(
-            found_objects
-        )
-    )
-
-
-    return found_objects
-
-
-# =========================================================
-# GET EXACT OBJECT INFORMATION
-# =========================================================
-
-def get_object_information(object_name):
-
-    object_name = (
-        object_name
-        .strip()
-        .lower()
-    )
-
-
-    # -----------------------------------------------------
-    # EXACT MATCH
-    # -----------------------------------------------------
-
-    if object_name in OBJECT_KNOWLEDGE:
-
-        print(
-            "Exact knowledge found:",
-            object_name
-        )
-
-        return OBJECT_KNOWLEDGE[
-            object_name
-        ]
-
-
-    # -----------------------------------------------------
-    # NORMALIZED MATCH
-    # -----------------------------------------------------
-
-    normalized_name = (
-        object_name
-        .replace(
-            "_",
-            " "
-        )
-        .strip()
-    )
-
-
-    if normalized_name in OBJECT_KNOWLEDGE:
-
-        print(
-            "Normalized knowledge found:",
-            normalized_name
-        )
-
-        return OBJECT_KNOWLEDGE[
-            normalized_name
-        ]
-
-
-    # -----------------------------------------------------
-    # NO INFORMATION
-    # -----------------------------------------------------
-
-    print(
-        "No knowledge found:",
-        object_name
-    )
-
-    return (
-        "No specific information found "
-        "for this object."
-    )
-
-
-# =========================================================
-# RAG SEARCH
-# =========================================================
-
-def search_knowledge(
-    query,
-    k=3
-):
-
-    try:
-
-        results = vectorstore.similarity_search(
-            query,
-            k=k
-        )
-
-        return results
-
-    except Exception as e:
-
-        print(
-            "RAG SEARCH ERROR:",
-            e
-        )
-
-        return []
-
-
-# =========================================================
-# HOME / IMAGE DETECTION
+# IMAGE DETECTION
 # =========================================================
 
 @app.route(
@@ -469,9 +104,9 @@ def index():
 
     grouped_detections = []
 
-    object_information = []
-
     total_objects = 0
+
+    object_information = []
 
 
     # =====================================================
@@ -498,11 +133,17 @@ def index():
 
         return render_template(
             "index.html",
+
             image_path=None,
+
             detections=[],
+
             grouped_detections=[],
+
             object_information=[],
+
             total_objects=0,
+
             error="No image was uploaded."
         )
 
@@ -518,11 +159,17 @@ def index():
 
         return render_template(
             "index.html",
+
             image_path=None,
+
             detections=[],
+
             grouped_detections=[],
+
             object_information=[],
+
             total_objects=0,
+
             error="Please select an image."
         )
 
@@ -560,10 +207,6 @@ def index():
         )
 
 
-        # =================================================
-        # START ANALYSIS
-        # =================================================
-
         print()
         print("=" * 60)
         print("JARVIS IMAGE ANALYSIS")
@@ -591,36 +234,24 @@ def index():
         result = results[0]
 
 
-        # =================================================
-        # GET DETECTIONS
-        # =================================================
-
         detected_names = []
 
 
-        for box in result.boxes:
+        # =================================================
+        # PROCESS DETECTIONS
+        # =================================================
 
-            # ---------------------------------------------
-            # CLASS ID
-            # ---------------------------------------------
+        for box in result.boxes:
 
             class_id = int(
                 box.cls[0]
             )
 
 
-            # ---------------------------------------------
-            # CONFIDENCE
-            # ---------------------------------------------
-
             confidence = float(
                 box.conf[0]
             )
 
-
-            # ---------------------------------------------
-            # OBJECT NAME
-            # ---------------------------------------------
 
             class_name = model.names[
                 class_id
@@ -632,10 +263,6 @@ def index():
                 2
             )
 
-
-            # ---------------------------------------------
-            # SAVE DETECTION
-            # ---------------------------------------------
 
             detections.append({
 
@@ -693,21 +320,15 @@ def index():
             ]
 
 
-            if confidences:
+            average_confidence = round(
 
-                average_confidence = round(
+                sum(confidences)
+                /
+                len(confidences),
 
-                    sum(confidences)
-                    /
-                    len(confidences),
+                2
 
-                    2
-
-                )
-
-            else:
-
-                average_confidence = 0
+            ) if confidences else 0
 
 
             grouped_detections.append({
@@ -738,7 +359,7 @@ def index():
 
 
         # =================================================
-        # EXACT KNOWLEDGE FOR DETECTED OBJECTS
+        # GET INFORMATION FOR DETECTED OBJECTS
         # =================================================
 
         seen_objects = set()
@@ -746,7 +367,6 @@ def index():
 
         for object_name in detected_names:
 
-            # Don't repeat same object
             if object_name in seen_objects:
 
                 continue
@@ -764,10 +384,18 @@ def index():
             )
 
 
-            information = (
-                get_object_information(
-                    object_name
-                )
+            # -------------------------------------------------
+            # Exact object lookup through local knowledge
+            # -------------------------------------------------
+
+            result_info = answer_question(
+                object_name
+            )
+
+
+            information = result_info.get(
+                "answer",
+                "No information found."
             )
 
 
@@ -824,7 +452,7 @@ def index():
 
 
         # =================================================
-        # PRINT SUMMARY
+        # SUMMARY
         # =================================================
 
         print()
@@ -920,9 +548,9 @@ def rag():
     ).strip()
 
 
-    # -----------------------------------------------------
-    # SUPPORT JSON
-    # -----------------------------------------------------
+    # =====================================================
+    # SUPPORT JSON REQUEST
+    # =====================================================
 
     if (
         not question
@@ -969,87 +597,59 @@ def rag():
         })
 
 
-    # =====================================================
-    # EXACT OBJECT DETECTION
-    # =====================================================
+    try:
 
-    matched_objects = (
-        find_objects_in_question(
-            question
+        # =================================================
+        # SEARCH LOCAL RAG
+        # =================================================
+
+        result = answer_question(
+            question,
+            k=3
         )
-    )
 
 
-    print(
-        "OBJECTS FOUND IN QUESTION:",
-        matched_objects
-    )
+        answer = result.get(
+            "answer",
+            ""
+        )
 
 
-    # =====================================================
-    # EXACT OBJECT SEARCH
-    # =====================================================
+        sources = result.get(
+            "sources",
+            []
+        )
 
-    if matched_objects:
+
+        search_type = result.get(
+            "type",
+            "search"
+        )
+
+
+        # =================================================
+        # RETURN RESPONSE
+        # =================================================
 
         print()
         print(
-            "EXACT OBJECT SEARCH MODE"
+            "SEARCH TYPE:",
+            search_type
         )
 
-
-        answer_parts = []
-
-        sources = []
-
-
-        for object_name in matched_objects:
-
-            information = (
-                get_object_information(
-                    object_name
-                )
-            )
-
-
-            # ---------------------------------------------
-            # Add information
-            # ---------------------------------------------
-
-            if information:
-
-                answer_parts.append(
-                    information
-                )
-
-
-            # ---------------------------------------------
-            # Add source
-            # ---------------------------------------------
-
-            sources.append(
-                object_name
-            )
-
-
-        # -------------------------------------------------
-        # FINAL EXACT ANSWER
-        # -------------------------------------------------
-
-        answer = "\n\n".join(
-            answer_parts
+        print(
+            "SOURCES:",
+            sources
         )
-
 
         print()
         print(
-            "EXACT RAG ANSWER:"
+            "ANSWER:"
         )
 
         print(
             answer
         )
-
 
         print(
             "=" * 60
@@ -1069,34 +669,11 @@ def rag():
         })
 
 
-    # =====================================================
-    # NORMAL RAG SEARCH
-    # =====================================================
-
-    print()
-    print(
-        "NO EXACT OBJECT FOUND."
-    )
-
-    print(
-        "Using FAISS similarity search..."
-    )
-
-
-    documents = search_knowledge(
-        question,
-        k=3
-    )
-
-
-    # =====================================================
-    # NO RESULTS
-    # =====================================================
-
-    if not documents:
+    except Exception as e:
 
         print(
-            "No relevant documents found."
+            "RAG ERROR:",
+            e
         )
 
 
@@ -1105,148 +682,55 @@ def rag():
             "success": False,
 
             "answer":
-                "I could not find relevant "
-                "information in my knowledge base.",
+                "An error occurred while "
+                "searching the knowledge base.",
 
-            "sources": []
+            "sources": [],
+
+            "error":
+                str(e)
 
         })
 
 
-    # =====================================================
-    # BUILD FAISS ANSWER
-    # =====================================================
+# =========================================================
+# HEALTH CHECK
+# =========================================================
 
-    answer_parts = []
-
-    sources = []
-
-
-    for document in documents:
-
-        # ---------------------------------------------
-        # DOCUMENT TEXT
-        # ---------------------------------------------
-
-        text = (
-            document.page_content
-            .strip()
-        )
-
-
-        if (
-            text
-            and
-            text not in answer_parts
-        ):
-
-            answer_parts.append(
-                text
-            )
-
-
-        # ---------------------------------------------
-        # SOURCE
-        # ---------------------------------------------
-
-        metadata = (
-            document.metadata
-            or {}
-        )
-
-
-        source = (
-            metadata.get("source")
-            or
-            metadata.get("file")
-            or
-            metadata.get("filename")
-        )
-
-
-        if (
-            source
-            and
-            source not in sources
-        ):
-
-            sources.append(
-                source
-            )
-
-
-    # =====================================================
-    # FINAL FAISS ANSWER
-    # =====================================================
-
-    if answer_parts:
-
-        answer = "\n\n".join(
-            answer_parts
-        )
-
-    else:
-
-        answer = (
-            "Relevant information was found, "
-            "but no readable text was available."
-        )
-
-
-    # =====================================================
-    # PRINT RESULT
-    # =====================================================
-
-    print()
-    print(
-        "RAG ANSWER:"
-    )
-
-    print(
-        answer
-    )
-
-
-    print()
-    print(
-        "SOURCES:",
-        sources
-    )
-
-
-    print(
-        "=" * 60
-    )
-
-
-    # =====================================================
-    # RETURN JSON
-    # =====================================================
+@app.route(
+    "/health",
+    methods=["GET"]
+)
+def health():
 
     return jsonify({
 
-        "success": True,
+        "status":
+            "healthy",
 
-        "answer":
-            answer,
+        "application":
+            "JARVIS",
 
-        "sources":
-            sources
+        "yolo":
+            "loaded",
+
+        "rag":
+            "local"
 
     })
 
 
 # =========================================================
-# RUN APPLICATION
+# RUN
 # =========================================================
 
 if __name__ == "__main__":
 
     app.run(
 
-        debug=True,
+        debug=False,
 
-        host="127.0.0.1",
+        host="0.0.0.0",
 
         port=5000
 

@@ -1,65 +1,377 @@
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
+import os
+import pickle
+
+from sklearn.metrics.pairwise import cosine_similarity
 
 
-TEXT_PATH = "documents/objects.txt"
-VECTORSTORE_PATH = "vectorstore"
+# =========================================================
+# BASE DIRECTORY
+# =========================================================
+
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 
-def create_vectorstore():
+# =========================================================
+# VECTORSTORE PATHS
+# =========================================================
 
-    # Read object information
-    with open(TEXT_PATH, "r", encoding="utf-8") as file:
-        text = file.read()
+VECTORSTORE_PATH = os.path.join(
+    BASE_DIR,
+    "vectorstore"
+)
 
-    # Separate each OBJECT section
-    sections = text.split("OBJECT:")
+DOCUMENTS_FILE = os.path.join(
+    VECTORSTORE_PATH,
+    "documents.pkl"
+)
 
-    documents = []
+VECTORIZER_FILE = os.path.join(
+    VECTORSTORE_PATH,
+    "vectorizer.pkl"
+)
 
-    for section in sections:
+MATRIX_FILE = os.path.join(
+    VECTORSTORE_PATH,
+    "matrix.pkl"
+)
 
-        section = section.strip()
 
-        if not section:
-            continue
+# =========================================================
+# LOAD VECTOR DATABASE
+# =========================================================
 
-        content = "OBJECT: " + section
+def load_vectorstore():
 
-        documents.append(
-            Document(
-                page_content=content
-            )
+    if not os.path.exists(DOCUMENTS_FILE):
+
+        raise FileNotFoundError(
+            "documents.pkl not found. "
+            "Run rebuild_vectorstore.py first."
         )
 
-    print("Object information loaded successfully!")
-    print("Number of objects:", len(documents))
+
+    if not os.path.exists(VECTORIZER_FILE):
+
+        raise FileNotFoundError(
+            "vectorizer.pkl not found. "
+            "Run rebuild_vectorstore.py first."
+        )
 
 
-    # Create embeddings
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    if not os.path.exists(MATRIX_FILE):
+
+        raise FileNotFoundError(
+            "matrix.pkl not found. "
+            "Run rebuild_vectorstore.py first."
+        )
+
+
+    with open(
+        DOCUMENTS_FILE,
+        "rb"
+    ) as file:
+
+        documents = pickle.load(file)
+
+
+    with open(
+        VECTORIZER_FILE,
+        "rb"
+    ) as file:
+
+        vectorizer = pickle.load(file)
+
+
+    with open(
+        MATRIX_FILE,
+        "rb"
+    ) as file:
+
+        matrix = pickle.load(file)
+
+
+    print(
+        "Local vector database loaded successfully!"
     )
 
-    print("Creating embeddings...")
+    print(
+        "Number of documents:",
+        len(documents)
+    )
 
 
-    # Create FAISS database
-    vectorstore = FAISS.from_documents(
+    return (
         documents,
-        embeddings
+        vectorizer,
+        matrix
     )
 
 
-    # Save database
-    vectorstore.save_local(
-        VECTORSTORE_PATH
+# =========================================================
+# LOAD DATABASE
+# =========================================================
+
+DOCUMENTS, VECTORIZER, MATRIX = load_vectorstore()
+
+
+# =========================================================
+# SEARCH KNOWLEDGE
+# =========================================================
+
+def search_knowledge(
+    query,
+    k=3
+):
+
+    query = (
+        query
+        .strip()
+        .lower()
     )
 
-    print("Vector database created successfully!")
+
+    if not query:
+
+        return []
 
 
-if __name__ == "__main__":
-    create_vectorstore()
+    # -----------------------------------------------------
+    # Convert question into local TF-IDF vector
+    # -----------------------------------------------------
+
+    query_vector = VECTORIZER.transform(
+        [query]
+    )
+
+
+    # -----------------------------------------------------
+    # Calculate similarity
+    # -----------------------------------------------------
+
+    similarities = cosine_similarity(
+        query_vector,
+        MATRIX
+    )[0]
+
+
+    # -----------------------------------------------------
+    # Sort highest similarity first
+    # -----------------------------------------------------
+
+    ranked_indexes = similarities.argsort()[
+        ::-1
+    ]
+
+
+    results = []
+
+
+    for index in ranked_indexes[:k]:
+
+        score = float(
+            similarities[index]
+        )
+
+
+        # Ignore completely unrelated results
+        if score <= 0:
+
+            continue
+
+
+        document = DOCUMENTS[index]
+
+
+        results.append({
+
+            "name":
+                document["name"],
+
+            "text":
+                document["text"],
+
+            "score":
+                round(
+                    score * 100,
+                    2
+                )
+
+        })
+
+
+    return results
+
+
+# =========================================================
+# EXACT OBJECT SEARCH
+# =========================================================
+
+def search_exact_object(
+    object_name
+):
+
+    object_name = (
+        object_name
+        .strip()
+        .lower()
+    )
+
+
+    for document in DOCUMENTS:
+
+        if (
+            document["name"].strip().lower()
+            == object_name
+        ):
+
+            return document
+
+
+    return None
+
+
+# =========================================================
+# SMART SEARCH
+# =========================================================
+
+def answer_question(
+    question,
+    k=3
+):
+
+    question = (
+        question
+        .strip()
+        .lower()
+    )
+
+
+    if not question:
+
+        return {
+            "answer":
+                "Please enter a question.",
+
+            "sources": []
+        }
+
+
+    # =====================================================
+    # FIRST: CHECK EXACT OBJECT NAME
+    # =====================================================
+
+    exact_match = search_exact_object(
+        question
+    )
+
+
+    if exact_match:
+
+        return {
+
+            "answer":
+                exact_match["text"],
+
+            "sources":
+                [exact_match["name"]],
+
+            "type":
+                "exact"
+
+        }
+
+
+    # =====================================================
+    # SECOND: CHECK IF QUESTION CONTAINS OBJECT NAME
+    # =====================================================
+
+    for document in DOCUMENTS:
+
+        object_name = (
+            document["name"]
+            .strip()
+            .lower()
+        )
+
+
+        if (
+            object_name in question
+        ):
+
+            return {
+
+                "answer":
+                    document["text"],
+
+                "sources":
+                    [object_name],
+
+                "type":
+                    "object"
+
+            }
+
+
+    # =====================================================
+    # THIRD: SEMANTIC / TF-IDF SEARCH
+    # =====================================================
+
+    results = search_knowledge(
+        question,
+        k=k
+    )
+
+
+    if not results:
+
+        return {
+
+            "answer":
+                "I could not find relevant "
+                "information in my knowledge base.",
+
+            "sources": [],
+
+            "type":
+                "none"
+
+        }
+
+
+    # -----------------------------------------------------
+    # Build answer
+    # -----------------------------------------------------
+
+    answer_parts = []
+
+    sources = []
+
+
+    for result in results:
+
+        answer_parts.append(
+            result["text"]
+        )
+
+
+        sources.append(
+            result["name"]
+        )
+
+
+    return {
+
+        "answer":
+            "\n\n".join(
+                answer_parts
+            ),
+
+        "sources":
+            sources,
+
+        "type":
+            "search"
+
+    }
