@@ -2,10 +2,26 @@ flask
 ultralytics
 pillow
 
+scikit-learn
+numpy
+scipy
+
+langchain
+langchain-community
+langchain-text-splitters
+pypdfFlask
+ultralytics
+Pillow
+
 langchain
 langchain-community
 langchain-text-splitters
 pypdf
+faiss-cpu
 
 scikit-learn
 numpy
+scipy
+
+opencv-python-headless
+faiss-cpu
